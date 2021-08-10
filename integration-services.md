@@ -2,12 +2,6 @@
 
 # Integration of Services on Azure
 
-
-
-## Introduction
-
-## 
-
 ## Event vs Message
 
 Azure offers following services that assist with delivering events or messages throughout a solution:
@@ -724,6 +718,16 @@ Sends data to an Event Hub - **Producer**
 - **Expired messages**
 - **Locked messages**
 
+### Message Deferral
+
+### Prefetch Messages
+
+### Auto-forwarding
+
+![sb-fwd-1](./Assets/sb-fwd-1.gif)
+
+![sb-fwd-1](./Assets/sb-fwd-2.gif)
+
 ### Service Bus - Paired namespaces
 
 ![sb-dr-1](./Assets/sb-dr-1.png)
@@ -762,7 +766,9 @@ Sends data to an Event Hub - **Producer**
 
 ![event-domain-eh](./Assets/use-case-5.png)
 
+![ZipImagesFunction](./Assets/ZipImagesFunction.png)
 
+![ValidateOCR](./Assets/ValidateOCR.png)
 
 
 
@@ -840,4 +846,22 @@ batchClient.JobOperations.AddTask(JobId, tasks);
 
 ![batch-1](./Assets/batch-3.png)
 
+
+
+## Advanced Topics
+
+### Azure Arc
+
+- **Event Grid Anywhere** - https://docs.microsoft.com/en-us/azure/event-grid/kubernetes/overview
+- **PaaS+Serverless Anywhere** - https://docs.microsoft.com/en-us/azure/app-service/manage-create-arc-environment?tabs=bash
+- **Cloud Native Anywhere** - https://codemongers.wordpress.com/2021/08/03/deploy-cloud-native-apps-anywhere-using-azure-arc-and-k8s/
+
 ## References
+
+- Event Hub - https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about
+- Event Grid - https://docs.microsoft.com/en-us/azure/event-grid/overview
+- Service Bus - https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview
+- Azure Batch - https://docs.microsoft.com/en-us/azure/batch/batch-technical-overview
+- Durable Function - https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=csharp
+- Logic Apps - https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-overview
+
