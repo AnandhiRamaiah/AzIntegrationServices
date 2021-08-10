@@ -418,19 +418,81 @@ Azure offers following services that assist with delivering events or messages t
 
 ### **Namespace**
 
+![namespace-eh](./Assets/namespace-eh.png)
+
+
+
 ### **Event publishers**
 
+Sends data to an Event Hub - **Producer**
+
+- Any entity that sends data to an event hub is an event producer, or *event publisher*
+- Event publishers can publish events using - 
+  - HTTPS
+  - AMQP 1.0
+  - Kafka 1.0 and later 
+- Event publishers use a Shared Access Signature (SAS) token to identify themselves to an event hub, and can have a unique identity, or use a common SAS token
+
 - **Publishing an event**
+
+  - Event Hubs ensures that all events sharing a partition key value are delivered in order, and to the same partition
+
+  - If partition keys are used with publisher policies, then the identity of the publisher and the value of the partition key must match. Otherwise, an error occurs
+
+    
+
+  ![partition_keys-eh](./Assets/partition_keys-eh.png)
+
 - **Publisher Policy**
+
+  - Event Hubs enables granular control over event publishers through *publisher policies*
+  - Publisher policies are run-time features designed to facilitate large numbers of independent event publishers 
+
+  ```json
+  //<my namespace>.servicebus.windows.net/<event hub name>/publishers/<my publisher name>
+  ```
+
+  
+
 - **Capture**
+
+  - Automatically capture the streaming data in Event Hubs and save it to either a Blob storage account or an Azure Data Lake Service account
+  - Enable Capture from the Azure portal, and specify a minimum size and time window to perform the capture
+
 - **Partitions**
+
+  - Ordered sequence of events that is held in an event hub
+  - As newer events arrive, they are added to the end of this sequence
+  - Can be thought of as a *commit log*
+  - Event Hubs retains data for a configured retention time that applies across all partitions in the event hub
+  - Events expire on a time basis; you cannot explicitly delete them. Because partitions are independent and contain their own sequence of data, they often grow at different rates
+
 - **Event Retention**
+
+  - Published events are removed from an Event Hub based on a configurable, timed-based retention policy:
+    - The **default** value and **shortest** possible retention period is **1 day (24 hours)**.
+    - For Event Hubs **Standard**, the maximum retention period is **7 days**.
+    - For Event Hubs **Premium** and **Dedicated**, the maximum retention period is **90 days**.
+    - If you change the retention period, it applies to all messages including messages that are already in the event hub.
 
 ### Event Consumers
 
+- Any entity that reads event data from an event hub is an *event consumer* 
+- All Event Hubs consumers connect via the AMQP 1.0 session and events are delivered through the session as they become available
+- Client does not need to poll for data availability 
+
 - **Consumer Groups**
-- **Checkpointing**
+  - Publish/subscribe mechanism of Event Hubs is enabled through *consumer groups*
+  - A consumer group is a view (*state, position, or offset*) of an entire event hub
+  - Enable multiple consuming applications to each have a separate view of the event stream and to read the stream independently at their own pace and with their own offsets
 - **Stream offsets**
+  - Position of an event within a partition
+  - Byte numbering of the event
+  - Enables an event consumer (reader) to specify a point in the event stream from which they want to begin reading events
+- **Checkpointing**
+  - Process by which readers mark or commit their position within a partition event sequence
+  - Checkpointing is the responsibility of the consumer and occurs on a per-partition basis within a consumer group
+  - For each consumer group, each partition reader must keep track of its current position in the event stream, and can inform the service when it considers the data stream complete
 
 ### Tiers
 
@@ -451,67 +513,88 @@ Azure offers following services that assist with delivering events or messages t
 
   -  guaranteed 99.99% SLA and is available only on our Dedicated pricing tier
 
-  - Namespaces and event hubs created within the Dedicated cluster include all features of the premium offering and more, but without any ingress limits. It also includes the popular [Event Hubs Capture](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview) feature at no additional cost. This feature allows you to automatically batch and log data streams to Azure Storage or Azure Data Lake.
+  - Namespaces and event hubs created within the Dedicated cluster include all features of the premium offering and more, but without any ingress limits. It also includes the popular [Event Hubs Capture](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview) feature at no additional cost. This feature allows automatically batch and log data streams to *Azure Storage* or *Azure Data Lake*.
 
-  - Clusters are provisioned and billed by **Capacity Units (CUs)**, a pre-allocated amount of CPU and memory resources. You can purchase 1, 2, 4, 8, 12, 16 or 20 CUs for each cluster. How much you can ingest and stream per CU depends on a variety of factors, such as the following ones:
+  - Clusters are provisioned and billed by **Capacity Units (CUs)**, a pre-allocated amount of CPU and memory resources. Y1, 2, 4, 8, 12, 16 or 20 CUs for each cluster can be purchased.The effective ingest and stream throughput per PU will depend on various factors, including:
 
     - Number of producers and consumers
     - Payload shape
     - Egress rate
 
-  - #### Single-tenancy guarantees capacity for better performance
-
-  - #### Inclusive and exclusive access to features
-
-  - 
+    
 
 - **Premium**
 
-  - The Event Hubs Premium tier is designed for high-end streaming scenarios that require elastic, superior performance with predictable latency
-
+  - Designed for high-end streaming scenarios that require elastic, superior performance with predictable latency
   -  The performance is achieved by providing reserved compute, memory, and storage resources, which minimize cross-tenant interference in a managed multi-tenant PaaS environment.
-
-  - Event Hubs Premium replicates every event to three replicas, distributed across Azure availability zones where available, and all replicas are synchronously flushed to the underlying fast storage before the send operation is reported as completed. Events that are not read immediately or that need to be re-read later can be retained up to 90 days, transparently held in an availability-zone redundant storage tier. Events in both the fast storage and retention storage tiers are encrypted; in Event Hubs Premium, the encryption keys can be supplied by you.
-
-  - In addition to these storage-related features and all capabilities and protocol support of the Event Hubs Standard offering, the isolation model of Event Hubs Premium enables new features like dynamic partition scale-up and yet-to-be-added future capabilities. You also get far more generous quota allocations. Event Hubs Capture is included at no extra cost.
-
-  - The Premium offering is billed by [Processing Units (PUs)](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-scalability#processing-units) which correspond to a share of isolated resources (CPU, Memory, and Storage) in the underlying infrastructure
-
+  - Replicates every event to three replicas, distributed across Azure *availability zones* where available, and all replicas are synchronously flushed to the underlying fast storage before the send operation is reported as completed
+  - Events that are not read immediately or that need to be re-read later can be retained up to 90 days, transparently held in an availability-zone redundant storage tier. Events in both the fast storage and retention storage tiers are encrypted; in Event Hubs Premium, the encryption keys can be BYOK
+  - Dynamic partition scale-up 
+  - The Premium offering is billed by **Processing Units (PUs)** which correspond to a share of isolated resources (*CPU, Memory, and Storage*) in the underlying infrastructure
   - In comparison to Dedicated offering, since Event Hubs Premium provides isolation inside a very large multi-tenant environment that can shift resources quickly, it can scale far more elastically and quicker and PUs can be dynamically adjusted. Therefore, Event Hubs Premium will often be a more cost effective option for mid-range (<120MB/sec) throughput requirements, especially with changing loads throughout the day or week, when compared to Event Hubs Dedicated
-
-  - You can purchase 1, 2, 4, 8 and 16 Processing Units for each namespace. Since Event Hubs Premium is a capacity-based offering, the achievable throughput is not set by a throttle as it is in Event Hubs Standard, but depends on the work you ask Event Hubs to do, similar to Event Hubs Dedicated. The effective ingest and stream throughput per PU will depend on various factors, including:
-
+  - 1, 2, 4, 8 and 16 - Processing Units for each namespace can be purchased. Since Event Hubs Premium is a capacity-based offering, the achievable throughput is not set by a throttle as it is in Event Hubs Standard, but depends on the work you ask Event Hubs to do, similar to Event Hubs Dedicated. The effective ingest and stream throughput per PU will depend on various factors, including:
     - Number of producers and consumers
     - Payload size
     - Partition count
     - Egress request rate
     - Usage of Event Hubs Capture, Schema Registry, and other advanced features
 
-  - #### Superior performance with the new two-tier storage engine
-
-  - #### Better isolation and predictability
-
-  - #### Cost savings and scalability
 
 
+### Capture Events
 
-### Capture events
-
-### Geo-disaster recovery
+![capture-eh](./Assets/capture-eh.png)
 
 ### Security
 
-### Availability and consistency
+- **Authorizarion**
+
+  - **Built-In Roles**
+
+    | Role                                                         | Description                                                  |
+    | :----------------------------------------------------------- | :----------------------------------------------------------- |
+    | [Azure Event Hubs Data owner](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#azure-event-hubs-data-owner) | Use this role to give complete access to Event Hubs resources. |
+    | [Azure Event Hubs Data sender](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#azure-event-hubs-data-sender) | Use this role to give the send access to Event Hubs resources. |
+    | [Azure Event Hubs Data receiver](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#azure-event-hubs-data-receiver) | Use this role to give the consuming/receiving access to Event Hubs resources. |
+
+- **Authentication**
+
+  - Authenticate from an Application - registered in Azure AD
+  - Authenticate with *Managed Identities*
+  - Authenticate with *Shared Access Signature* (*SAS token*)
+
+- **Network Security**
+
+  - **IP firewall**
+  - **Service Endpoints**
+  - **Private endpoints**
 
 ### Scalability
 
-- **Throughput units**
+- **Throughput units** (*Standard*)
 
-- **Processing units**
+  - Throughput units are pre-purchased units of capacity. 1 TU lets you:
+    - **Ingress**: Up to 1 MB per second or 1000 events per second (whichever comes first).
+    - **Egress**: Up to 2 MB per second or 4096 events per second.
 
-- **Capacity Units (CUs)**
+- **Processing units** (*Premium*)
 
-  - 
+  - Resource Isolation at the CPU and Memory
+  - 1, 2, 4, 8 or 16 *Processing Units* for each Event Hubs can be purchased
+
+- **Capacity Units (CUs)** (*Dedicated*)
+
+  - A pre-allocated amount of CPU and Memory resources
+
+  - 1, 2, 4, 8, 12, 16 or 20 *Capacity Units* can be purchased. Factors:
+
+    - Number of Producers and Consumers
+
+    - Payload shape
+
+    - Egress rate
+
+      
 
 - **Partitions**
 
@@ -526,33 +609,51 @@ Azure offers following services that assist with delivering events or messages t
   
 
   - **Advantages of using partitions**
-
     - Capacity of a single process limited
     - Partitions adds more processes
     - Multiplying the throughput capacity
-
   - **Number of partitions**
-
     - Pricing depends on TU, PU or CU
     - Choose at least as many partitions as you expect that are required during the peak load
     - Can not be changed later
-
   - **Mapping of events to partitions**
+    - Partition key to map incoming event data into specific partitions
+    - Related events together in the same Partition
+    - Publisher is only aware of its ***partition key, not the partition*** 
+    - Decoupling of Key and Partition; separate concerns of downstream processing
 
-    - partition key to map incoming event data into specific partitions
-    - publisher is only aware of its partition key, not the partition 
-    - decoupling of key and partition insulates the sender from needing to know too much about the downstream processing.
-    - related events together in the same partition
+### Availability & Consistency 
 
-    
+#### Availability
 
+- Spreads the risk of failures of individual machines or even complete racks across clusters that span multiple failure domains within a DC
+- Transparent failure detection and failover mechanisms
+- Service will continue to operate within the assured service-levels
+- Without noticeable interruptions when such failures occur
+- With *availability zones* enabled, the outage risk is further spread across three physically separated facilities
+- Service has enough capacity reserves to instantly cope up with the complete, catastrophic loss of the entire facility
+- If Client application sends events to an event hub without specifying a partition, events are automatically distributed among partitions. If a partition isn't available for some reason, events are distributed among the remaining partitions
+- Greatest amount of up time. For use cases that require the maximum up time, this model is preferred instead of sending events to a specific partition
 
+#### Consistency
 
+- If the ordering of events is important, a client application sends events to a specific partition so that the ordering is preserved
+- When a consumer application consumes these events from the partition, they are read in order
+- If the particular partition to which you are sending is unavailable, you will receive an error response. As a point of comparison, if you don't have an affinity to a single partition, the Event Hubs service sends your event to the next available partition.
 
+#### Point to Note
 
+- If high availability is most important, don't target a specific partition (using partition ID/key). Using partition ID/key downgrades the availability of an event hub to partition-level
 
+- Choose between availability (no partition ID/key) and consistency (pinning events to a specific partition)
 
+  
 
+### Geo-disaster recovery
+
+#### ![dr-eh-1](./Assets/dr-eh-1.png)
+
+![dr-eh-2](./Assets/dr-eh-2.png)
 
 
 
