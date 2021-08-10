@@ -507,19 +507,44 @@ Azure offers following services that assist with delivering events or messages t
 
 - **Throughput units**
 
-- ## Processing units
+- **Processing units**
 
 - **Capacity Units (CUs)**
 
-- ## Partitions
-
-  - ### Advantages of using partitions
-
-  - ### Number of partitions
-
-  - ### Mapping of events to partitions
-
   - 
+
+- **Partitions**
+
+  
+
+  ![multiple-partitions-1](./Assets/multiple-partitions-1.png)
+
+  
+
+  ![multiple-partitions-2](./Assets/multiple-partitions-2.png)
+
+  
+
+  - **Advantages of using partitions**
+
+    - Capacity of a single process limited
+    - Partitions adds more processes
+    - Multiplying the throughput capacity
+
+  - **Number of partitions**
+
+    - Pricing depends on TU, PU or CU
+    - Choose at least as many partitions as you expect that are required during the peak load
+    - Can not be changed later
+
+  - **Mapping of events to partitions**
+
+    - partition key to map incoming event data into specific partitions
+    - publisher is only aware of its partition key, not the partition 
+    - decoupling of key and partition insulates the sender from needing to know too much about the downstream processing.
+    - related events together in the same partition
+
+    
 
 
 
