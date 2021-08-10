@@ -434,9 +434,94 @@ Azure offers following services that assist with delivering events or messages t
 
 ### Tiers
 
+| Feature                                   | Basic                  | Standard               | Premium                              | Dedicated               |
+| :---------------------------------------- | :--------------------- | :--------------------- | :----------------------------------- | :---------------------- |
+| Tenancy                                   | Multi-tenant           | Multi-tenant           | Multi-tenant with resource isolation | Exclusive single tenant |
+| Private link                              | N/A                    | Yes                    | Yes                                  | Yes                     |
+| Customer-managed key (Bring your own key) | N/A                    | N/A                    | Yes                                  | Yes                     |
+| Capture                                   | N/A                    | Priced separately      | Included                             | Included                |
+| Dynamic Partition scale out               | N/A                    | N/A                    | Yes                                  | Yes                     |
+| Ingress events                            | Pay per million events | Pay per million events | Included                             | Included                |
+
 - **Basic** and **Standard**
+
 - **Dedicated**
+
+  - *Event Hubs clusters* offer single-tenant deployments for customers with the most demanding streaming needs
+
+  -  guaranteed 99.99% SLA and is available only on our Dedicated pricing tier
+
+  - Namespaces and event hubs created within the Dedicated cluster include all features of the premium offering and more, but without any ingress limits. It also includes the popular [Event Hubs Capture](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview) feature at no additional cost. This feature allows you to automatically batch and log data streams to Azure Storage or Azure Data Lake.
+
+  - Clusters are provisioned and billed by **Capacity Units (CUs)**, a pre-allocated amount of CPU and memory resources. You can purchase 1, 2, 4, 8, 12, 16 or 20 CUs for each cluster. How much you can ingest and stream per CU depends on a variety of factors, such as the following ones:
+
+    - Number of producers and consumers
+    - Payload shape
+    - Egress rate
+
+  - #### Single-tenancy guarantees capacity for better performance
+
+  - #### Inclusive and exclusive access to features
+
+  - 
+
 - **Premium**
+
+  - The Event Hubs Premium tier is designed for high-end streaming scenarios that require elastic, superior performance with predictable latency
+
+  -  The performance is achieved by providing reserved compute, memory, and storage resources, which minimize cross-tenant interference in a managed multi-tenant PaaS environment.
+
+  - Event Hubs Premium replicates every event to three replicas, distributed across Azure availability zones where available, and all replicas are synchronously flushed to the underlying fast storage before the send operation is reported as completed. Events that are not read immediately or that need to be re-read later can be retained up to 90 days, transparently held in an availability-zone redundant storage tier. Events in both the fast storage and retention storage tiers are encrypted; in Event Hubs Premium, the encryption keys can be supplied by you.
+
+  - In addition to these storage-related features and all capabilities and protocol support of the Event Hubs Standard offering, the isolation model of Event Hubs Premium enables new features like dynamic partition scale-up and yet-to-be-added future capabilities. You also get far more generous quota allocations. Event Hubs Capture is included at no extra cost.
+
+  - The Premium offering is billed by [Processing Units (PUs)](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-scalability#processing-units) which correspond to a share of isolated resources (CPU, Memory, and Storage) in the underlying infrastructure
+
+  - In comparison to Dedicated offering, since Event Hubs Premium provides isolation inside a very large multi-tenant environment that can shift resources quickly, it can scale far more elastically and quicker and PUs can be dynamically adjusted. Therefore, Event Hubs Premium will often be a more cost effective option for mid-range (<120MB/sec) throughput requirements, especially with changing loads throughout the day or week, when compared to Event Hubs Dedicated
+
+  - You can purchase 1, 2, 4, 8 and 16 Processing Units for each namespace. Since Event Hubs Premium is a capacity-based offering, the achievable throughput is not set by a throttle as it is in Event Hubs Standard, but depends on the work you ask Event Hubs to do, similar to Event Hubs Dedicated. The effective ingest and stream throughput per PU will depend on various factors, including:
+
+    - Number of producers and consumers
+    - Payload size
+    - Partition count
+    - Egress request rate
+    - Usage of Event Hubs Capture, Schema Registry, and other advanced features
+
+  - #### Superior performance with the new two-tier storage engine
+
+  - #### Better isolation and predictability
+
+  - #### Cost savings and scalability
+
+
+
+### Capture events
+
+### Geo-disaster recovery
+
+### Security
+
+### Availability and consistency
+
+### Scalability
+
+- **Throughput units**
+
+- ## Processing units
+
+- **Capacity Units (CUs)**
+
+- ## Partitions
+
+  - ### Advantages of using partitions
+
+  - ### Number of partitions
+
+  - ### Mapping of events to partitions
+
+  - 
+
+
 
 
 
