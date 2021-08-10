@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="4.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Microsoft.Azure.WebJobs.Extensions.EventHubs" />
+    <None Remove="Event1Consumer1App\" />
+    <None Remove="Event1Consumer2App\" />
+    <None Remove="Event2ConsumerApp\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Event1Consumer1App\" />
+    <Folder Include="Event1Consumer2App\" />
+    <Folder Include="Event2ConsumerApp\" />
+  </ItemGroup>
+</Project>

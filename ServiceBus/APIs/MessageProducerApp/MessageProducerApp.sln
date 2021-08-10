@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageProducerApp", "MessageProducerApp/MessageProducerApp.csproj", "{7F25305D-A4A4-4F8B-A9D8-4232ED53AEAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F25305D-A4A4-4F8B-A9D8-4232ED53AEAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F25305D-A4A4-4F8B-A9D8-4232ED53AEAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F25305D-A4A4-4F8B-A9D8-4232ED53AEAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F25305D-A4A4-4F8B-A9D8-4232ED53AEAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {788811D1-155F-4364-BD88-3BA31F054CCD}
+	EndGlobalSection
+EndGlobal
