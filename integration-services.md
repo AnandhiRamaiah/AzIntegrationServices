@@ -659,6 +659,10 @@ Sends data to an Event Hub - **Producer**
 
 ## Service Bus
 
+![about-service-bus-queue](./Assets/about-service-bus-queue.png)
+
+![about-service-bus-topic](./Assets/about-service-bus-topic.png)
+
 - Intended for traditional enterprise applications which require transactions, ordering, duplicate detection, and instantaneous consistency
 - Enables cloud-native applications to provide reliable state transition management for business processes 
 - Facilitates highly secure communication across hybrid cloud solutions and can connect existing on-premises systems to cloud solutions
@@ -706,7 +710,19 @@ Sends data to an Event Hub - **Producer**
 - Failure of Service Bus on single subsystem. In this situation, a compute node can get into an inconsistent state and must restart itself, causing all entities it serves to load balance to other nodes. This in turn can cause a short period of slow message processing
 - The client application generates a *System.TimeoutException* or *MessagingException* exception. Service Bus contains a mitigation for this issue in the form of automated client retry logic. Once the retry period is exhausted and the message is not delivered
 
+### Message Sessions
 
+![sb-sessions](./Assets/sb-sessions.png)
+
+### Duplicate detection
+
+### Topic filters and actions
+
+### Message browsing
+
+- **Dead-lettered messages**
+- **Expired messages**
+- **Locked messages**
 
 ### Service Bus - Paired namespaces
 
