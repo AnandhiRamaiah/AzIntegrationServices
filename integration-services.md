@@ -327,17 +327,17 @@ Azure offers following services that assist with delivering events or messages t
   - If the endpoint responds within 3 minutes, Event Grid will attempt to remove the event from the retry queue on a best effort basis but duplicates may still be received.
 
 - **Disaster Recovery**
-  - Event Grid now has an automatic geo disaster recovery (GeoDR) of meta-data not only for new, but all existing domains, topics, and event subscriptions. If an entire Azure region goes down, Event Grid will already have all of your event-related infrastructure metadata synced to a paired region. Your new events will begin to flow again with no intervention by you.
+  - Automatic geo disaster recovery (GeoDR) of meta-data not only for new, but all existing domains, topics, and event subscriptions. If an entire Azure region goes down, Event Grid will already have all of your event-related infrastructure metadata synced to a paired region. Your new events will begin to flow again with no intervention by you.
   - Disaster recovery is measured with two metrics:
-    - Recovery Point Objective (RPO): the minutes or hours of data that may be lost.
-    - Recovery Time Objective (RTO): the minutes or hours the service may be down.
+    - **Recovery Point Objective (RPO)**: the minutes or hours of data that may be lost.
+    - **Recovery Time Objective (RTO)**: the minutes or hours the service may be down.
   - Event Grid’s automatic failover has different RPOs and RTOs for your metadata (event subscriptions etc.) and data (events)
-  - **Recovery point objective (RPO)**
-    - **Metadata RPO**: zero minutes. Anytime a resource is created in Event Grid, it's instantly replicated across regions. When a failover occurs, no metadata is lost.
-    - **Data RPO**: If your system is healthy and caught up on existing traffic at the time of regional failover, the RPO for events is about 5 minutes.
-  - **Recovery time objective (RTO)**
-    - **Metadata RTO**: Though generally it happens much more quickly, within 60 minutes, Event Grid will begin to accept create/update/delete calls for topics and subscriptions.
-    - **Data RTO**: Like metadata, it generally happens much more quickly, however within 60 minutes, Event Grid will begin accepting new traffic after a regional failover.
+    - **Recovery point objective (RPO)**
+      - **Metadata RPO**: zero minutes. Anytime a resource is created in Event Grid, it's instantly replicated across regions. When a failover occurs, no metadata is lost
+      - **Data RPO**: If your system is healthy and caught up on existing traffic at the time of regional failover, the RPO for events is about 5 minutes
+    - **Recovery time objective (RTO)**
+      - **Metadata RTO**: Though generally it happens much more quickly, within 60 minutes, Event Grid will begin to accept create/update/delete calls for topics and subscriptions
+      - **Data RTO**: Like metadata, it generally happens much more quickly, however within 60 minutes, Event Grid will begin accepting new traffic after a regional failover
 
 ### Security
 
@@ -656,5 +656,172 @@ Sends data to an Event Hub - **Producer**
 ![dr-eh-2](./Assets/dr-eh-2.png)
 
 
+
+## Service Bus
+
+- Intended for traditional enterprise applications which require transactions, ordering, duplicate detection, and instantaneous consistency
+- Enables cloud-native applications to provide reliable state transition management for business processes 
+- Facilitates highly secure communication across hybrid cloud solutions and can connect existing on-premises systems to cloud solutions
+- Brokered messaging system. It stores messages in a "broker" (for example, a queue) until the consuming party is ready to receive the messages 
+- Available either as data streams or bundled event batches
+- It has the following characteristics:
+  - Reliable asynchronous message delivery (enterprise messaging as a service) that requires polling
+  - Advanced messaging features like FIFO, batching/sessions, transactions, dead-lettering, temporal control, routing and filtering, and duplicate detection
+  - At least once delivery
+  - Optional in-order delivery
+
+### Queues
+
+- Offer *First In, First Out* (FIFO) message delivery to one or more competing consumers
+- Receivers typically receive and process messages in the order in which they were added to the queue, and only one message consumer receives and processes each message
+- Producers (senders) and consumers (receivers) do not have to be sending and receiving messages at the same time, because messages are stored durably in the queue
+- Producer does not have to wait for a reply from the consumer in order to continue to process and send messages
+- Related benefit is *load* *levelling* which enables producers and consumers to send and receive messages at different rates
+
+### Topics and subscriptions
+
+- Provide a one-to-many form of communication, in a *publish/subscribe* pattern
+- Useful for scaling to large numbers of recipients, each published message is made available to each subscription registered with the topic 
+- Messages are sent to a topic and delivered to one or more associated subscriptions
+
+
+
+### Service Bus - Reliability
+
+**Throttling**
+
+- Throttling from an external system on which Service Bus depends
+- Throttling occurs from interactions with storage and compute resources
+- Code must read the error and halt any retries of the message for at least 10 seconds. Since the error can happen across pieces of the customer application, it is expected that each piece independently executes the retry logic
+- The code can reduce the probability of being throttled by enabling partitioning on a queue or topic
+
+**Issue for an Azure dependency**
+
+- Issue for a system on which Service Bus depends. For example, a given part of storage can encounter issues
+- To work around these types of issues, Service Bus regularly investigates and implements mitigations
+- Due to the nature of the mitigation, a sent message can take up to 15 minutes to appear in the affected queue or subscription and be ready for a receive operation
+
+**Service Bus failure on a single subsystem**
+
+- Failure of Service Bus on single subsystem. In this situation, a compute node can get into an inconsistent state and must restart itself, causing all entities it serves to load balance to other nodes. This in turn can cause a short period of slow message processing
+- The client application generates a *System.TimeoutException* or *MessagingException* exception. Service Bus contains a mitigation for this issue in the form of automated client retry logic. Once the retry period is exhausted and the message is not delivered
+
+
+
+### Service Bus - Paired namespaces
+
+![sb-dr-1](./Assets/sb-dr-1.png)
+
+
+
+![sb-dr-1](./Assets/sb-dr-2.png)
+
+- Supports scenarios in which a Service Bus entity or deployment within a data center becomes unavailable
+- To maintain application availability during an outage, Service Bus users can use two separate namespaces, preferably in separate data centers, to host their messaging entities
+  - **Primary namespace**: The namespace with which your application interacts, for send and receive operations
+  - **Secondary namespace**: The namespace that acts as a backup to the primary namespace. Application logic does not interact with this namespace
+  - **Failover interval**: The amount of time to accept normal failures before the application switches from the primary namespace to the secondary namespace
+- Paired namespaces support *send availability*. Send availability preserves the ability to send messages. To use send availability, your application must meet the following requirements:
+  - Messages are only received from the primary namespace
+  - Messages sent to a given queue or topic might arrive out of order
+  - Messages within a session might arrive out of order. This is a break from normal functionality of sessions. This means that your application uses sessions to logically group messages
+  - Session state is only maintained on the primary namespace
+  - The primary queue can come online and start accepting messages before the secondary queue delivers all messages into the primary queue.
+
+## Use Cases
+
+![event-domain-eh](./Assets/use-case-1.png)
+
+
+
+
+
+![event-domain-eh](./Assets/use-case-2.png)
+
+
+
+![event-domain-eh](./Assets/use-case-3.png)
+
+![event-domain-eh](./Assets/use-case-4.png)
+
+![event-domain-eh](./Assets/use-case-5.png)
+
+
+
+
+
+## Azure Batch
+
+![batch-1](./Assets/batch-1.png)
+
+**Configure Machine pool**
+
+```c#
+private static VirtualMachineConfiguration CreateVirtualMachineConfiguration(ImageReference imageReference)
+{
+    return new VirtualMachineConfiguration(
+        imageReference: imageReference,
+        nodeAgentSkuId: "batch.node.windows amd64");
+}
+
+private static ImageReference CreateImageReference()
+{
+    return new ImageReference(
+        publisher: "MicrosoftWindowsServer",
+        offer: "WindowsServer",
+        sku: "2016-datacenter-smalldisk",
+        version: "latest");
+}
+
+private static void CreateBatchPool(BatchClient batchClient, VirtualMachineConfiguration vmConfiguration)
+{
+    try
+    {
+        CloudPool pool = batchClient.PoolOperations.CreatePool(
+            poolId: PoolId,
+            targetDedicatedComputeNodes: PoolNodeCount,
+            virtualMachineSize: PoolVMSize,
+            virtualMachineConfiguration: vmConfiguration);
+
+        pool.Commit();
+    }
+...
+  
+```
+
+**Create JOB**
+
+```C#
+try
+{
+    CloudJob job = batchClient.JobOperations.CreateJob();
+    job.Id = JobId;
+    job.PoolInformation = new PoolInformation { PoolId = PoolId };
+
+    job.Commit();
+}
+...
+```
+
+**Create Tasks**
+
+```c#
+for (int i = 0; i < inputFiles.Count; i++)
+{
+    string taskId = String.Format("Task{0}", i);
+    string inputFilename = inputFiles[i].FilePath;
+    string taskCommandLine = String.Format("cmd /c type {0}", inputFilename);
+
+    CloudTask task = new CloudTask(taskId, taskCommandLine);
+    task.ResourceFiles = new List<ResourceFile> { inputFiles[i] };
+    tasks.Add(task);
+}
+
+batchClient.JobOperations.AddTask(JobId, tasks);
+```
+
+![batch-1](./Assets/batch-2.png)
+
+![batch-1](./Assets/batch-3.png)
 
 ## References
