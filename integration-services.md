@@ -292,7 +292,7 @@ Azure offers following services that assist with delivering events or messages t
 
   - provides durable delivery
 
-  - decides whether it should retry the delivery, dead-letter the event, or drop the event based on the type of the error
+  - decides whether it should retry the delivery, **dead-letter** the event, or drop the event based on the type of the error
 
   - can't be fixed with retries (for example, if the endpoint is deleted), EventGrid will either perform dead-lettering on the event or drop the event if dead-letter isn't configured
 
@@ -303,7 +303,7 @@ Azure offers following services that assist with delivering events or messages t
     | Azure Resources | 400 Bad Request, 413 Request Entity Too Large, 403 Forbidden |
     | Webhook         | 400 Bad Request, 413 Request Entity Too Large, 403 Forbidden, 404 Not Found, 401 Unauthorized |
 
-  - Event Grid waits 30 seconds for a response after delivering a message. After 30 seconds, if the endpoint hasn’t responded, the message is queued for retry. Event Grid uses an exponential backoff retry policy for event delivery
+  - Event Grid waits 30 seconds for a response after delivering a message. After 30 seconds, if the endpoint hasn’t responded, the message is queued for retry. Event Grid uses an **exponential backoff** retry policy for event delivery
 
   - Event Grid retries delivery on the following schedule on a best effort basis:
 
