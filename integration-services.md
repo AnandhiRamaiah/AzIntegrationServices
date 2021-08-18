@@ -17,11 +17,11 @@ Azure offers following services that assist with delivering events or messages t
 ![event_hubs_architecture](./Assets/event_hubs_architecture.png)
 
 - Lightweight notification of a condition or a state change
-- Publisher of the event has no expectation about how the event is handled
-- Consumer of the event decides what to do with the notification
-- Events can be discrete units or part of a series
-  - Discrete events report state change and are actionable
-  - Series events report a condition and are analysable. The events are time-ordered and interrelated
+- *Publisher* of the Event has no expectation about how the event is handled
+- *Consumer* of the Event decides what to do with the notification
+- *Events* can be discrete units or part of a series
+  - Discrete Events report state change and are actionable
+  - Series Events report a condition and are analysable; time-ordered and interrelated
 
 ### Messages
 
@@ -35,9 +35,9 @@ Azure offers following services that assist with delivering events or messages t
 
 - Contains the data that triggered the message pipeline
 
-- Publisher of the message has an expectation about how the consumer handles the message
+- *Publisher* of the message has an expectation about how the *Consumer* handles the message
 
-- Contract exists between the two sides
+- *Contract* exists between the two sides
 
   
 
@@ -51,25 +51,23 @@ Azure offers following services that assist with delivering events or messages t
 
 
 
-## EventGrid
+## Event Grid
 
 ![functional-model](./Assets/event-grid.png)
 
-- Publishers emit events, but have no expectation about which events are handled
-- Subscribers decide which events they want to handle
+- *Publishers* emit Events, but have no expectation about which events are handled
+- *Subscribers* decide which Events they want to handle
 - Deeply integrated with Azure services and can be integrated with third-party services
-- Simplifies event consumption and lowers costs by eliminating the need for constant polling
+- Simplifies Event consumption and lowers costs by eliminating the need for constant polling
 - Efficiently and reliably routes events from Azure and non-Azure resources
 - Distributes the events to registered subscriber endpoints
 - Not a data pipeline, and doesn't deliver the actual object that was updated
-- Supports Dead-lettering for events that aren't delivered to an endpoint
+- Supports **Dead-lettering** for events that aren't delivered to an endpoint
 - It has the following characteristics:
-  - Dynamically scalable
+  - Dynamically Scalable
   - Low cost
   - Serverless
   - At least once delivery
-
-#### 
 
 ### Events
 
@@ -88,18 +86,18 @@ Azure offers following services that assist with delivering events or messages t
 
 ### Topics
 
-- Provides an endpoint where the Source sends events
+- Provides an endpoint where the Source sends Events
 
-- The publisher creates the event grid topic, and decides whether an event source needs one topic or more than one topic
+- The publisher creates the *Event Grid **Topic***, and decides whether an event source needs one topic or more than one topic
 
-- A Topic is used for a collection of related events. To respond to certain types of events, subscribers decide which topics to subscribe to
+- A *Topic* is used for a collection of related events. To respond to certain types of events, subscribers decide which topics to subscribe to
 
-- **System topics**
+- **System Topics**
 
   - Built-in topics provided by Azure services
   - Azure Storage, Azure Event Hubs and Azure Service Bus
 
-- **Custom topics**
+- **Custom Topics**
 
   - application and third-party topics
   - Create Topics according to Modules
@@ -118,7 +116,7 @@ Azure offers following services that assist with delivering events or messages t
 ### Subscribers
 
 - Event handlers; consumes the event
-- [Azure functions](https://docs.microsoft.com/en-us/azure/event-grid/handler-functions)
+- [Azure Functions](https://docs.microsoft.com/en-us/azure/event-grid/handler-functions)
 - [Event hubs](https://docs.microsoft.com/en-us/azure/event-grid/handler-event-hubs)
 - [Relay hybrid connections](https://docs.microsoft.com/en-us/azure/event-grid/handler-relay-hybrid-connections)
 - [Service Bus queues and topics](https://docs.microsoft.com/en-us/azure/event-grid/handler-service-bus)
@@ -134,7 +132,7 @@ Azure offers following services that assist with delivering events or messages t
 
 ### Batching
 
-- When using a custom topic, events must always be published in an array
+- When using a *Custom Topic*, Events must always be published in an array
 - Recommended to batch several events together per publish to achieve higher efficiency
 - Batches can be up to 1 MB. Each event should still not be greater than 1 MB as well
 
@@ -290,11 +288,11 @@ Azure offers following services that assist with delivering events or messages t
 
 - **Delivery & Retry**
 
-  - provides durable delivery
+  - Provides *Durable Delivery*
 
-  - decides whether it should retry the delivery, **dead-letter** the event, or drop the event based on the type of the error
+  - Decides whether it should retry the delivery, **dead-letter** the event, or drop the event based on the type of the error
 
-  - can't be fixed with retries (for example, if the endpoint is deleted), EventGrid will either perform dead-lettering on the event or drop the event if dead-letter isn't configured
+  - Can't be fixed with retries (e.g. if the endpoint is deleted), *Event Grid* will either perform *dead-lettering* on the event or drop the event if dead-letter isn't configured
 
     
 
@@ -303,9 +301,9 @@ Azure offers following services that assist with delivering events or messages t
     | Azure Resources | 400 Bad Request, 413 Request Entity Too Large, 403 Forbidden |
     | Webhook         | 400 Bad Request, 413 Request Entity Too Large, 403 Forbidden, 404 Not Found, 401 Unauthorized |
 
-  - Event Grid waits 30 seconds for a response after delivering a message. After 30 seconds, if the endpoint hasn’t responded, the message is queued for retry. Event Grid uses an **exponential backoff** retry policy for event delivery
+  - *Event Grid* waits 30 seconds for a response after delivering a message. After 30 seconds, if the endpoint hasn’t responded, the message is queued for retry. Event Grid uses an **exponential backoff** retry policy for event delivery
 
-  - Event Grid retries delivery on the following schedule on a best effort basis:
+  - *Event Grid* retries delivery on the following schedule on a best effort basis:
 
     - 10 seconds
     - 30 seconds
@@ -318,10 +316,10 @@ Azure offers following services that assist with delivering events or messages t
     - 6 hours
     - Every 12 hours up to 24 hours
 
-  - If the endpoint responds within 3 minutes, Event Grid will attempt to remove the event from the retry queue on a best effort basis but duplicates may still be received.
+  - If the endpoint responds within 3 minutes, *Event Grid* will attempt to remove the event from the retry queue on a best effort basis but duplicates may still be received.
 
 - **Disaster Recovery**
-  - Automatic geo disaster recovery (GeoDR) of meta-data not only for new, but all existing domains, topics, and event subscriptions. If an entire Azure region goes down, Event Grid will already have all of your event-related infrastructure metadata synced to a paired region. Your new events will begin to flow again with no intervention by you.
+  - Automatic geo disaster recovery (GeoDR) of meta-data not only for new, but all existing domains, topics, and event subscriptions. If an entire Azure region goes down, *Event Grid* will already have all of your event-related infrastructure metadata synced to a paired region. Your new events will begin to flow again with no intervention by you.
   - Disaster recovery is measured with two metrics:
     - **Recovery Point Objective (RPO)**: the minutes or hours of data that may be lost.
     - **Recovery Time Objective (RTO)**: the minutes or hours the service may be down.
@@ -341,10 +339,10 @@ Azure offers following services that assist with delivering events or messages t
 
     | Role                                                         | Description                                               |
     | :----------------------------------------------------------- | :-------------------------------------------------------- |
-    | [Event Grid Subscription Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#eventgrid-eventsubscription-reader) | Lets you read Event Grid event subscriptions.             |
-    | [Event Grid Subscription Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#eventgrid-eventsubscription-contributor) | Lets you manage Event Grid event subscription operations. |
-    | [Event Grid Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#eventgrid-contributor) | Lets you create and manage Event Grid resources.          |
-    | [Event Grid Data Sender](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#eventgrid-data-sender) | Lets you send events to Event Grid topics.                |
+    | [Event Grid Subscription Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#Event Grid-eventsubscription-reader) | Lets you read Event Grid event subscriptions.             |
+    | [Event Grid Subscription Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#Event Grid-eventsubscription-contributor) | Lets you manage Event Grid event subscription operations. |
+    | [Event Grid Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#Event Grid-contributor) | Lets you create and manage Event Grid resources.          |
+    | [Event Grid Data Sender](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#Event Grid-data-sender) | Lets you send events to Event Grid topics.                |
 
     
 
@@ -357,7 +355,7 @@ Azure offers following services that assist with delivering events or messages t
       "IsCustom": true,
       "Description": "Event grid read only role",
       "Actions": [
-        "Microsoft.EventGrid/*/read"
+        "Microsoft.Event Grid/*/read"
       ],
       "NotActions": [
       ],
@@ -375,8 +373,8 @@ Azure offers following services that assist with delivering events or messages t
 
   | Authentication method                                       | Supported handlers                                           | Description                                                  |
   | :---------------------------------------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-  | Access key                                                  | Event HubsService BusStorage QueuesRelay Hybrid ConnectionsAzure FunctionsStorage Blobs (Deadletter) | Access keys are fetched using Event Grid service principal's credentials. The permissions are granted to Event Grid when you register the Event Grid resource provider in their Azure subscription. |
-  | Managed System Identity & Role-based access control         | Event HubsService BusStorage QueuesStorage  Blobs (Deadletter) | Enable managed system identity for the topic and add it to the appropriate role on the destination. For details, see [Use system-assigned identities for event delivery](https://docs.microsoft.com/en-us/azure/event-grid/security-authentication#use-system-assigned-identities-for-event-delivery). |
+  | Access key                                                  | Event Hubs, Service Bus, Storage Queues, Relay Hybrid Connections, Azure Functions, Storage Blobs (*Deadletter*) | Access keys are fetched using *Event Grid* service principal's credentials. The permissions are granted to *Event Grid* when you register the *Event Grid* resource provider in their Azure subscription. |
+  | Managed System Identity & Role-based access control         | Event Hubs, Service Bus, Storage Queues, Storage  Blobs (*Deadletter*) | Enable managed system identity for the topic and add it to the appropriate role on the destination. For details, see [Use system-assigned identities for event delivery](https://docs.microsoft.com/en-us/azure/event-grid/security-authentication#use-system-assigned-identities-for-event-delivery). |
   | Bearer token authentication with Azure AD protected webhook | Webhook                                                      | See the [Authenticate event delivery to webhook endpoints](https://docs.microsoft.com/en-us/azure/event-grid/security-authentication#authenticate-event-delivery-to-webhook-endpoints) section for details.. |
   | Client secret as a query parameter                          | Webhook                                                      | See the [Using client secret as a query parameter](https://docs.microsoft.com/en-us/azure/event-grid/security-authentication#using-client-secret-as-a-query-parameter) section for details. |
 
@@ -429,7 +427,7 @@ Sends data to an Event Hub - **Producer**
 
 - **Publishing an event**
 
-  - Event Hubs ensures that all events sharing a partition key value are delivered in order, and to the same partition
+  - *Event Hubs* ensures that all events sharing a partition key value are delivered in order, and to the same partition
 
   - If partition keys are used with publisher policies, then the identity of the publisher and the value of the partition key must match. Otherwise, an error occurs
 
@@ -472,7 +470,7 @@ Sends data to an Event Hub - **Producer**
 ### Event Consumers
 
 - Any entity that reads event data from an event hub is an *event consumer* 
-- All Event Hubs consumers connect via the AMQP 1.0 session and events are delivered through the session as they become available
+- All *Event Hubs* consumers connect via the AMQP 1.0 session and events are delivered through the session as they become available
 - Client does not need to poll for data availability 
 
 - **Consumer Groups**
@@ -858,10 +856,14 @@ batchClient.JobOperations.AddTask(JobId, tasks);
 
 ## References
 
-- Event Hub - https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about
-- Event Grid - https://docs.microsoft.com/en-us/azure/event-grid/overview
-- Service Bus - https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview
-- Azure Batch - https://docs.microsoft.com/en-us/azure/batch/batch-technical-overview
-- Durable Function - https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=csharp
-- Logic Apps - https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-overview
+- **Event Hub** - https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about
+- **Event Grid** - https://docs.microsoft.com/en-us/azure/event-grid/overview
+- **Service Bus** - https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview
+- **Azure Batch** - https://docs.microsoft.com/en-us/azure/batch/batch-technical-overview
+- **Durable Function** - https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=csharp
+- **Logic Apps** - https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-overview
+- **Code Examples**
+  - https://github.com/monojit18/ValidateOCRApp
+  - https://github.com/monojit18/ZipImagesFunction
+  - https://github.com/monojit18/AzIntegrationServices
 
