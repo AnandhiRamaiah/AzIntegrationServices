@@ -5,10 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Controllers\" />
+    <None Remove="Models\" />
+    <None Remove="Newtonsoft.Json" />
     <None Remove="Azure.Messaging.ServiceBus" />
     <None Remove="Microsoft.Azure.Management.ServiceBus" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.2.1" />
     <PackageReference Include="Microsoft.Azure.Management.ServiceBus" Version="2.1.0" />
   </ItemGroup>
