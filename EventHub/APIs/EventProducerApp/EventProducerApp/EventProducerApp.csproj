@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Newtonsoft.Json" />
+    <None Remove="Microsoft.Azure.Management.EventHub" />
+    <None Remove="Azure.Messaging.EventHubs" />
+    <None Remove="Controllers\" />
+    <None Remove="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Azure.Management.EventHub" Version="2.7.2" />
+    <PackageReference Include="Azure.Messaging.EventHubs" Version="5.6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+</Project>
