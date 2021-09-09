@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 
 namespace EventProcessorApp
 {
-    public static class Event1Consumer2App
+    public static class OCREventHubConsumer2App
     {
 
-        [FunctionName("Event1Consumer2App")]
-        public static async Task Run([EventHubTrigger("%EventHub1Name%",
-                                     Connection = "EventHubConnectionString",
-                                     ConsumerGroup = "ConsumerGroup2Name")]
+        [FunctionName("OCREventHubConsumer2App")]
+        public static async Task Run([EventHubTrigger("%OCREventHub%",
+                                     Connection = "OCREventHubConnection",
+                                     ConsumerGroup = "%OCREHConsumerGroup2%")]
                                      EventData[] events, ILogger log)
         {
 

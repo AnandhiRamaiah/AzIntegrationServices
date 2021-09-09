@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 
 namespace EventProcessorApp
 {
-    public static class Event1Consumer1App
+    public static class IOTEventHubConsumer1App
     {
 
-        [FunctionName("Event1Consumer1App")]
-        public static async Task Run([EventHubTrigger("%EventHub1Name%",
-                                     Connection = "EventHubConnectionString",
-                                     ConsumerGroup = "ConsumerGroup1Name")]
+        [FunctionName("IOTEventHubConsumer1App")]
+        public static async Task Run([EventHubTrigger("%IOTEventHub%",
+                                     Connection = "IOTEventHubConnection",
+                                     ConsumerGroup = "%IOTEHConsumerGroup1%")]
                                      EventData[] events, ILogger log)
         {
 
