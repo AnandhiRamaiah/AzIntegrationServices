@@ -438,6 +438,10 @@
 - [Service Bus queues and topics](https://docs.microsoft.com/en-us/azure/event-grid/handler-service-bus)
 - [Storage queues](https://docs.microsoft.com/en-us/azure/event-grid/handler-storage-queues)
 
+![event-grid-1](./Assets/event-grid-1.png)
+
+![event-grid-1](./Assets/event-grid-1.png)
+
 ![event-grid-handler](./Assets/event-grid-handler.png)
 
 
@@ -965,7 +969,12 @@ Sends data to an Event Hub - **Producer**
 
 ![dr-eh-2](./Assets/dr-eh-2.png)
 
+- Fault tolerance across **different** datacenter regions.
+- 2 separate premium namespaces are provisioned and paired.
+- Metadata is always in sync.
+- Failover is managed by the customer
 
+![event-hub-flow](./Assets/event-hub-flow.png)
 
 
 
