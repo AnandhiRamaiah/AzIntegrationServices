@@ -390,6 +390,24 @@ Azure offers following services that assist with delivering events or messages t
 
 
 
+### Geo-disaster recovery
+
+- Disaster recovery is measured with two metrics:
+  - **Recovery Point Objective (RPO)**: The minutes or hours of data that may be lost
+  - **Recovery Time Objective (RTO)**: The minutes or hours the service may be down
+- Event Grid’s automatic failover has different RPOs and RTOs for metadata (*topics, domains, event subscriptions*) and data (events)
+- *Custom implementation* - [client-side fail over using the topic health apis](https://docs.microsoft.com/en-us/azure/event-grid/custom-disaster-recovery).
+
+## Recovery point objective (RPO)
+
+- **Metadata RPO**: zero minutes. Anytime a resource is created in Event Grid, it's instantly replicated across regions. When a failover occurs, no metadata is lost
+- **Data RPO**: If your system is healthy and caught up on existing traffic at the time of regional failover, the RPO for events is about 5 minutes
+
+## Recovery time objective (RTO)
+
+- **Metadata RTO**: Though generally it happens much more quickly, within 60 minutes, Event Grid will begin to accept create/update/delete calls for topics and subscriptions.
+- **Data RTO**: Like metadata, it generally happens much more quickly, however within 60 minutes, Event Grid will begin accepting new traffic after a regional failover
+
 
 
 ## Event Hub
@@ -639,6 +657,15 @@ Sends data to an Event Hub - **Producer**
 
 - Choose between availability (no partition ID/key) and consistency (pinning events to a specific partition)
 
+
+### Availability Zones
+
+- Fault tolerance within the **same** datacenter region
+
+- 3 copies (Primary + 2 secondary) are stored across different datacenters in the same region
+
+- In case of datacenter failure, one of the secondary copies becomes the primary, ***automatically***.
+
   
 
 ### Geo-disaster recovery
@@ -647,7 +674,15 @@ Sends data to an Event Hub - **Producer**
 
 ![dr-eh-2](./Assets/dr-eh-2.png)
 
+- Fault tolerance across **different** datacenter regions.
 
+- 2 separate premium namespaces are provisioned and paired.
+
+- Metadata is always in sync.
+
+- Failover is managed by the customer
+
+  
 
 ## Service Bus
 
