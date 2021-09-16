@@ -42,7 +42,18 @@
 
     - **Time Series** - Continuous Stream
 
+      
     
+  
+  ### Comparison of Messaging Services
+  
+  | **Service** | **Purpose**                     | **Type**                      | **When to use**                             |
+  | ----------- | ------------------------------- | ----------------------------- | ------------------------------------------- |
+  | Event Grid  | Reactive programming            | Event distribution (discrete) | React to status changes                     |
+  | Event Hubs  | Big data pipeline               | Event streaming (series)      | Telemetry and distributed data streaming    |
+  | Service Bus | High-value enterprise messaging | Message                       | Order processing and financial transactions |
+
+
 
 ## Orchestraors
 
@@ -104,6 +115,8 @@
 
 #### App Services
 
+![app-service](./Assets/app-service.png)
+
 
 
 #### API Management
@@ -113,8 +126,17 @@
 - Cloud hosted, turnkey solution 
 - Works with any host, API, and scale
 - Promotes and supports developer engagement
+- Attract more developers
 - Secures and optimizes APIs
 - Provides API insights and analytics
 
 
+
+## Messaging Services - Deep Dive
+
+![messaging](./Assets/messaging.png)
+
+
+
+## Service Bus
 
