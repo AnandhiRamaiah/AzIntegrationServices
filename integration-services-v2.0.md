@@ -224,6 +224,7 @@
   - **Boolean filters** - **TrueFilters** and **FalseFilters** either cause all arriving messages (**true**) or none of the arriving messages (**false**) to be selected for the subscription. These two filters derive from the SQL filter
   - **Correlation Filters** - Set of conditions that are matched against one or more of an arriving message's user and system properties
 
+
 ### Service Bus - Reliability
 
 #### Throttling
@@ -360,10 +361,314 @@
   - **Failover interval**: The amount of time to accept normal failures before the application switches from the primary namespace to the secondary namespace
 - Paired namespaces support *send availability*. Send availability preserves the ability to send messages. To use send availability, your application must meet the following requirements:
   - Messages are only received from the primary namespace
+  
   - Messages sent to a given queue or topic might arrive out of order
+  
   - Messages within a session might arrive out of order. This is a break from normal functionality of sessions. This means that your application uses sessions to logically group messages
+  
   - Session state is only maintained on the primary namespace
+  
   - The primary queue can come online and start accepting messages before the secondary queue delivers all messages into the primary queue
+  
+    
+
+
+### Code Examples
+
+##### Refer - ()
+
+#### SendQueueMessageAsync
+
+```c#
+private static async Task<ResponseModel> SendQueueMessageAsync
+            (string queueNameString, HeaderModel headerModel, List<MessageModel> messagesList)
+        {
+
+            if (kServiceBusClient == null)
+                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
+
+            var serviceBusSender = kServiceBusClient.CreateSender(queueNameString);            
+            var serviceBusMessagesList = PrepareAllMessages(messagesList);
+            ResponseModel responseModel = null;
+
+            try
+            {
+
+                await serviceBusSender.SendMessagesAsync(serviceBusMessagesList);
+                responseModel = new ResponseModel()
+                {
+
+                    Code = 200,
+                    Message = $"message batch sent:{serviceBusMessagesList.Count}"
+
+                };
+            }
+            catch(ServiceBusException ex)
+            {
+
+                responseModel = new ResponseModel()
+                {
+
+                    Code = 400,
+                    Message = ex.Message
+
+                };
+            }
+            finally
+            {
+                await serviceBusSender.DisposeAsync();
+            }
+
+            return responseModel;
+
+        }
+```
+
+
+
+#### ScheduleQueueMessageAsync
+
+```c#
+private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
+            (string queueNameString, HeaderModel headerModel, List<MessageModel> messagesList,
+            Dictionary<string, int> queryStringMap)
+        {
+
+            if (kServiceBusClient == null)
+                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
+
+            var serviceBusSender = kServiceBusClient.CreateSender(queueNameString);            
+            var serviceBusMessagesList = PrepareAllMessages(messagesList);                
+            int delayMinutes = (int)(queryStringMap["delayBy"])/60;
+            long scheduleSequence = 0;            
+            var responseModelsList = new List<ResponseModel>();
+
+            try
+            {
+
+                
+                var scheduledTasksList = serviceBusMessagesList.Select(
+                    async (ServiceBusMessage serviceBusMessage) =>
+                {
+
+                    scheduleSequence = await serviceBusSender.ScheduleMessageAsync(
+                                                serviceBusMessage,
+                                                DateTimeOffset.Now.AddMinutes(delayMinutes));
+                    var responseModel = new ResponseModel()
+                    {
+
+                        Code = 200,
+                        Message = $"message scheduled:{scheduleSequence}"
+
+                    };
+                    responseModelsList.Add(responseModel);
+
+                }).ToList();
+
+                await Task.WhenAll(scheduledTasksList);
+                
+            }
+            catch (ServiceBusException ex)
+            {
+
+                var responseModel = new ResponseModel()
+                {
+
+                    Code = 400,
+                    Message = ex.Message
+
+                };
+                responseModelsList.Add(responseModel);
+
+            }
+            finally
+            {
+                await serviceBusSender.DisposeAsync();
+            }
+
+            return responseModelsList;
+
+        }
+```
+
+
+
+#### ReadFromDeadLetterQueue
+
+```c#
+[HttpGet]
+        [Route("deadletter/queue/{queueNameString}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ReadFromDeadLetterQueue
+            (string queueNameString, [FromHeader] HeaderModel headerModel)
+        {
+
+            if (kServiceBusClient == null)
+                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
+
+             var deadLetterReceiver = kServiceBusClient.CreateReceiver(queueNameString,
+             new ServiceBusReceiverOptions()
+             {
+
+                 SubQueue = SubQueue.DeadLetter,
+                 ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+
+             });
+
+            MessageModel receivedModel = null;
+            ErrorModel errorModel = null;
+
+            try
+            {
+
+                var receivedMessage = await deadLetterReceiver.ReceiveMessageAsync(kWaitTimeSpan);
+                if (receivedMessage == null)
+                    throw new ArgumentNullException(nameof(receivedMessage));
+
+                receivedModel = JsonConvert.DeserializeObject<MessageModel>
+                                    (Encoding.UTF8.GetString(receivedMessage.Body));
+                if (receivedModel == null)
+                    throw new ArgumentNullException(nameof(receivedModel));
+
+            }
+            catch(ArgumentNullException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
+
+            }
+            finally
+            {
+
+                await deadLetterReceiver.DisposeAsync();
+
+            }
+
+            return Ok((receivedModel != null) ? receivedModel : errorModel);
+
+        }
+```
+
+
+
+#### ForwardTopicAsync
+
+```c#
+[HttpPost]
+        [Route("forward/topic/{topicNameString}/subscription/{subscriptionNameString}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForwardTopicAsync
+            (string topicNameString, string subscriptionNameString,
+            [FromHeader] ForwardHeaderModel forwardHeaderModel,
+            [FromQuery] Dictionary<string, string> queryStringMap)
+        {
+
+            var serviceBusClientOptions = new ServiceBusClientOptions()
+            {
+
+                EnableCrossEntityTransactions = true,                
+                TransportType = ServiceBusTransportType.AmqpTcp
+
+            };
+
+            if (kServiceBusClient == null)
+                kServiceBusClient = new ServiceBusClient(forwardHeaderModel.ConnectionString,
+                                                         serviceBusClientOptions);
+
+            var serviceBusSessionReceiverOptions = new ServiceBusSessionReceiverOptions()
+            {
+
+                PrefetchCount = 2,
+                ReceiveMode = ServiceBusReceiveMode.PeekLock              
+
+            };
+
+            ServiceBusSessionReceiver sessionReceiver = null;
+            ServiceBusSender nextHopSender = null;
+            OCRModel receivedModel = null;
+            ErrorModel errorModel = null;
+
+            try
+            {
+
+                var shouldForce = (queryStringMap != null) && queryStringMap["force"].Equals("true");
+                var sessionNameString = queryStringMap["session"];
+
+                //var nextHopConnectionString = forwardHeaderModel.NextHopConnectionString;
+                var nextHopTopicNameString = forwardHeaderModel.NextHopTopicName;                
+                var nextHopSessionNameString = forwardHeaderModel.NextHopSessionName;
+
+                sessionReceiver = await kServiceBusClient.AcceptSessionAsync
+                (topicNameString, subscriptionNameString, sessionNameString,
+                serviceBusSessionReceiverOptions);
+
+                nextHopSender = kServiceBusClient.CreateSender(nextHopTopicNameString);
+
+                var receivedMessage = await sessionReceiver.ReceiveMessageAsync(kWaitTimeSpan);                                            
+                if (receivedMessage == null)
+                    throw new ArgumentNullException(nameof(receivedMessage));
+
+                receivedModel = JsonConvert.DeserializeObject<OCRModel>
+                                    (Encoding.UTF8.GetString(receivedMessage.Body));
+                if (receivedModel == null)
+                    throw new ArgumentNullException(nameof(receivedModel));
+
+                using (var ts = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    await sessionReceiver.CompleteMessageAsync(receivedMessage);
+
+                    var serviceBusMessage = new ServiceBusMessage(receivedMessage);
+                    serviceBusMessage.TransactionPartitionKey = receivedMessage.PartitionKey;
+                    await nextHopSender.SendMessageAsync(serviceBusMessage);
+                    ts.Complete();
+
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 400,
+                    Message = ex.Message
+
+                };
+
+            }
+            catch (ServiceBusException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
+
+            }
+            finally
+            {
+
+                await sessionReceiver.DisposeAsync();
+                await nextHopSender.DisposeAsync();
+
+            }
+
+            return Ok((receivedModel != null) ? receivedModel : errorModel);
+
+        }
+```
 
 
 
