@@ -24,11 +24,13 @@ resource sbNamespace 'Microsoft.ServiceBus/namespaces@2018-01-01-preview' = {
       lockDuration: 'PT2M'
       maxSizeInMegabytes: 2048
       requiresDuplicateDetection: true
-      requiresSession: false    
-      deadLetteringOnMessageExpiration: false
-      duplicateDetectionHistoryTimeWindow: 'PT20M'
-      maxDeliveryCount: 5        
-      enablePartitioning: true        
+      requiresSession: false
+      defaultMessageTimeToLive: 'PT5M'
+      deadLetteringOnMessageExpiration: true
+      duplicateDetectionHistoryTimeWindow: 'PT10M'
+      maxDeliveryCount: 5
+      enablePartitioning: true
+          
     }
   
     dependsOn: [
@@ -41,9 +43,10 @@ resource sbNamespace 'Microsoft.ServiceBus/namespaces@2018-01-01-preview' = {
     properties: {
       defaultMessageTimeToLive: 'PT2M'
       maxSizeInMegabytes: 2048
-      requiresDuplicateDetection: true      
-      supportOrdering: true      
-      enablePartitioning: true      
+      requiresDuplicateDetection: true
+      supportOrdering: true
+      enablePartitioning: true
+      duplicateDetectionHistoryTimeWindow: 'PT10M'
     }
     dependsOn: [
       sbNamespace
