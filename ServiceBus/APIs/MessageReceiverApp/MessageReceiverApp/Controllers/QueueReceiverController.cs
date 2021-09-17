@@ -37,7 +37,7 @@ namespace MessageReceiverApp.Controllers
             var shouldForce = (queryStringMap != null) && queryStringMap["force"].Equals("true");
             var receiver = kServiceBusClient.CreateReceiver(queueNameString);            
             MessageModel receivedModel = null;
-            ErrorModel errorModel = null;
+            ErrorModel errorModel = null;            
 
             try
             {
@@ -49,22 +49,20 @@ namespace MessageReceiverApp.Controllers
                 receivedModel = JsonConvert.DeserializeObject<MessageModel>
                                    (Encoding.UTF8.GetString(receivedMessage.Body));
                 if (receivedModel == null)
-                    throw new ArgumentNullException(nameof(receivedModel));                
+                    throw new ArgumentNullException(nameof(receivedModel));   
 
                 if (receivedModel.MessageId.StartsWith("dl") == true)
                     await receiver.DeadLetterMessageAsync(receivedMessage);
                 else if ((receivedModel.MessageId.StartsWith("ab") == true)
-                         && (shouldForce == false))
+                        && (shouldForce == false))
                     await receiver.AbandonMessageAsync(receivedMessage);
                 else if (receivedModel.MessageId.StartsWith("df") == true)
                 {
                     receivedModel.SequenceNumber = receivedMessage.SequenceNumber;
                     await receiver.DeferMessageAsync(receivedMessage);
-                }
-                    
+                }                    
                 else
                     await receiver.CompleteMessageAsync(receivedMessage);
-
             }
             catch(ArgumentNullException ex)
             {
@@ -96,7 +94,79 @@ namespace MessageReceiverApp.Controllers
             }
 
             return Ok((receivedModel != null) ? receivedModel : errorModel);
+        }
 
+        [HttpGet]
+        [Route("queue/{queueNameString}/peek")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PeekFromQueue(string queueNameString,
+                                                          [FromHeader] HeaderModel headerModel,
+                                                          [FromQuery] Dictionary<string, string>
+                                                          queryStringMap)
+        {
+
+            if (kServiceBusClient == null)
+                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
+
+            var serviceBusReceiverOptions = new ServiceBusReceiverOptions()
+            {
+                ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+            };
+
+            var receiver = kServiceBusClient.CreateReceiver(queueNameString,
+                                                            serviceBusReceiverOptions);            
+            MessageModel receivedModel = null;
+            ErrorModel errorModel = null;
+            var receivedModelsList = new List<MessageModel>();
+
+            try
+            {
+
+                var receivedMessagesList = await receiver.PeekMessagesAsync(5);
+                foreach (var receivedMessage in receivedMessagesList)
+                {
+
+                    receivedModel = JsonConvert.DeserializeObject<MessageModel>
+                                   (Encoding.UTF8.GetString(receivedMessage.Body));
+                    if (receivedModel == null)
+                    throw new ArgumentNullException(nameof(receivedModel)); 
+
+                    receivedModel.SequenceNumber = receivedMessage.SequenceNumber;
+                    receivedModelsList.Add(receivedModel);
+
+                }                                
+            }
+            catch(ArgumentNullException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 400,
+                    Message = ex.Message
+
+                };
+            }
+            catch (ServiceBusException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
+            }
+            finally
+            {
+
+                await receiver.DisposeAsync();
+
+            }
+
+            return Ok((receivedModelsList.Count > 0) ? receivedModelsList : errorModel);
         }
 
         [HttpGet]
