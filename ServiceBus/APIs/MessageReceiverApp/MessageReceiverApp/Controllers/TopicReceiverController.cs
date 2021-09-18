@@ -16,7 +16,7 @@ namespace MessageReceiverApp.Controllers
     public class TopicReceiverController : Controller
     {
 
-        private static ServiceBusClient kServiceBusClient;
+        private ServiceBusClient kServiceBusClient;
         private static TimeSpan kWaitTimeSpan = TimeSpan.FromMilliseconds(500);
 
         [HttpGet]
@@ -29,9 +29,7 @@ namespace MessageReceiverApp.Controllers
             [FromQuery] Dictionary<string, string> queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);            
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             ServiceBusSessionReceiver sessionReceiver = null;
             OCRModel receivedModel = null;
             ErrorModel errorModel = null;
@@ -45,7 +43,7 @@ namespace MessageReceiverApp.Controllers
                 sessionReceiver = await kServiceBusClient.AcceptSessionAsync
                 (topicNameString, subscriptionNameString, sessionNameString);
 
-                var receivedMessage = await sessionReceiver.ReceiveMessageAsync(kWaitTimeSpan);
+                var receivedMessage = await sessionReceiver?.ReceiveMessageAsync(kWaitTimeSpan);
                 if (receivedMessage == null)
                     throw new ArgumentNullException(nameof(receivedMessage));
 
@@ -55,18 +53,17 @@ namespace MessageReceiverApp.Controllers
                     throw new ArgumentNullException(nameof(receivedModel));
 
                 if (receivedModel.OCRId.StartsWith("dl") == true)
-                    await sessionReceiver.DeadLetterMessageAsync(receivedMessage);
+                    await sessionReceiver?.DeadLetterMessageAsync(receivedMessage);
                 else if ((receivedModel.OCRId.StartsWith("ab") == true)
                          && (shouldForce == false))
-                    await sessionReceiver.AbandonMessageAsync(receivedMessage);
+                    await sessionReceiver?.AbandonMessageAsync(receivedMessage);
                 else if (receivedModel.OCRId.StartsWith("df") == true)
                 {
                     receivedModel.SequenceNumber = receivedMessage.SequenceNumber;
-                    await sessionReceiver.DeferMessageAsync(receivedMessage);
+                    await sessionReceiver?.DeferMessageAsync(receivedMessage);
                 }
-
                 else
-                    await sessionReceiver.CompleteMessageAsync(receivedMessage);
+                    await sessionReceiver?.CompleteMessageAsync(receivedMessage);
 
             }
             catch (ArgumentNullException ex)
@@ -94,7 +91,8 @@ namespace MessageReceiverApp.Controllers
             finally
             {
 
-                await sessionReceiver.DisposeAsync();
+                if (sessionReceiver != null)
+                    await sessionReceiver.DisposeAsync();
 
             }
 
@@ -111,9 +109,7 @@ namespace MessageReceiverApp.Controllers
             [FromHeader] HeaderModel headerModel)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var deadLetterReceiver = kServiceBusClient.CreateReceiver
                 (topicNameString, subscriptionNameString, new ServiceBusReceiverOptions()
              {
@@ -129,7 +125,7 @@ namespace MessageReceiverApp.Controllers
             try
             {
 
-                var receivedMessage = await deadLetterReceiver.ReceiveMessageAsync(kWaitTimeSpan);
+                var receivedMessage = await deadLetterReceiver?.ReceiveMessageAsync(kWaitTimeSpan);
                 if (receivedMessage == null)
                     throw new ArgumentNullException(nameof(receivedMessage));
 
@@ -151,10 +147,22 @@ namespace MessageReceiverApp.Controllers
                 };
 
             }
+            catch (ServiceBusException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
+            }
             finally
             {
 
-                await deadLetterReceiver.DisposeAsync();
+                if (deadLetterReceiver != null)
+                    await deadLetterReceiver.DisposeAsync();
 
             }
 
@@ -172,9 +180,7 @@ namespace MessageReceiverApp.Controllers
             [FromQuery] Dictionary<string, string> queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var serviceBusSessionReceiverOptions = new ServiceBusSessionReceiverOptions()
             {
 
@@ -196,9 +202,8 @@ namespace MessageReceiverApp.Controllers
                 sessionReceiver = await kServiceBusClient.AcceptSessionAsync
                 (topicNameString, subscriptionNameString, sessionNameString,
                 serviceBusSessionReceiverOptions);
-
                 
-                var receivedMessage = await sessionReceiver.ReceiveDeferredMessageAsync
+                var receivedMessage = await sessionReceiver?.ReceiveDeferredMessageAsync
                                             (deferredSequenceNumber);
 
                 if (receivedMessage == null)
@@ -239,7 +244,8 @@ namespace MessageReceiverApp.Controllers
             finally
             {
 
-                await sessionReceiver.DisposeAsync();
+                if (sessionReceiver != null)
+                    await sessionReceiver.DisposeAsync();
 
             }
 
@@ -251,7 +257,7 @@ namespace MessageReceiverApp.Controllers
         [Route("forward/topic/{topicNameString}/subscription/{subscriptionNameString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ForwardTopicAsync
+        public async Task<IActionResult> ForwardToTopicAsync
             (string topicNameString, string subscriptionNameString,
             [FromHeader] ForwardHeaderModel forwardHeaderModel,
             [FromQuery] Dictionary<string, string> queryStringMap)
@@ -265,11 +271,9 @@ namespace MessageReceiverApp.Controllers
 
             };
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(forwardHeaderModel.ConnectionString,
-                                                         serviceBusClientOptions);
-
-            var serviceBusSessionReceiverOptions = new ServiceBusSessionReceiverOptions()
+            kServiceBusClient = new ServiceBusClient(forwardHeaderModel.ConnectionString,
+                                                     serviceBusClientOptions);
+            var serviceBusReceiverOptions = new ServiceBusReceiverOptions()
             {
 
                 PrefetchCount = 2,
@@ -277,7 +281,7 @@ namespace MessageReceiverApp.Controllers
 
             };
 
-            ServiceBusSessionReceiver sessionReceiver = null;
+            ServiceBusReceiver serviceBusReceiver = null;
             ServiceBusSender nextHopSender = null;
             OCRModel receivedModel = null;
             ErrorModel errorModel = null;
@@ -287,18 +291,16 @@ namespace MessageReceiverApp.Controllers
 
                 var shouldForce = (queryStringMap != null) && queryStringMap["force"].Equals("true");
                 var sessionNameString = queryStringMap["session"];
-
-                //var nextHopConnectionString = forwardHeaderModel.NextHopConnectionString;
+                
                 var nextHopTopicNameString = forwardHeaderModel.NextHopTopicName;                
                 var nextHopSessionNameString = forwardHeaderModel.NextHopSessionName;
 
-                sessionReceiver = await kServiceBusClient.AcceptSessionAsync
-                (topicNameString, subscriptionNameString, sessionNameString,
-                serviceBusSessionReceiverOptions);
-
+                serviceBusReceiver = kServiceBusClient.CreateReceiver(
+                                        topicNameString, subscriptionNameString,
+                                        serviceBusReceiverOptions);
                 nextHopSender = kServiceBusClient.CreateSender(nextHopTopicNameString);
 
-                var receivedMessage = await sessionReceiver.ReceiveMessageAsync(kWaitTimeSpan);                                            
+                var receivedMessage = await serviceBusReceiver?.ReceiveMessageAsync(kWaitTimeSpan);                                            
                 if (receivedMessage == null)
                     throw new ArgumentNullException(nameof(receivedMessage));
 
@@ -310,10 +312,12 @@ namespace MessageReceiverApp.Controllers
                 using (var ts = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
 
-                    await sessionReceiver.CompleteMessageAsync(receivedMessage);
+                    await serviceBusReceiver.CompleteMessageAsync(receivedMessage);
 
                     var serviceBusMessage = new ServiceBusMessage(receivedMessage);
                     serviceBusMessage.TransactionPartitionKey = receivedMessage.PartitionKey;
+                    serviceBusMessage.SessionId = nextHopSessionNameString;
+                    
                     await nextHopSender.SendMessageAsync(serviceBusMessage);
                     ts.Complete();
 
@@ -346,8 +350,11 @@ namespace MessageReceiverApp.Controllers
             finally
             {
 
-                await sessionReceiver.DisposeAsync();
-                await nextHopSender.DisposeAsync();
+                if (serviceBusReceiver != null)
+                    await serviceBusReceiver.DisposeAsync();
+
+                if (nextHopSender != null)
+                    await nextHopSender.DisposeAsync();
 
             }
 

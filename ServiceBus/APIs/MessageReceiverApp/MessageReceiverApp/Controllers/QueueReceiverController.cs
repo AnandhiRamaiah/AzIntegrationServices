@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Transactions;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace MessageReceiverApp.Controllers
     public class QueueReceiverController : Controller
     {
 
-        private static ServiceBusClient kServiceBusClient;
+        private ServiceBusClient kServiceBusClient;
         private static TimeSpan kWaitTimeSpan = TimeSpan.FromMilliseconds(500);
 
         [HttpGet]
@@ -31,9 +32,7 @@ namespace MessageReceiverApp.Controllers
                                                           queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var shouldForce = (queryStringMap != null) && queryStringMap["force"].Equals("true");
             var receiver = kServiceBusClient.CreateReceiver(queueNameString);            
             MessageModel receivedModel = null;
@@ -106,9 +105,7 @@ namespace MessageReceiverApp.Controllers
                                                           queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+           kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var serviceBusReceiverOptions = new ServiceBusReceiverOptions()
             {
                 ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
@@ -177,9 +174,7 @@ namespace MessageReceiverApp.Controllers
             (string queueNameString, [FromHeader] HeaderModel headerModel)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
              var deadLetterReceiver = kServiceBusClient.CreateReceiver(queueNameString,
              new ServiceBusReceiverOptions()
              {
@@ -205,7 +200,7 @@ namespace MessageReceiverApp.Controllers
                     throw new ArgumentNullException(nameof(receivedModel));
 
             }
-            catch(ArgumentNullException ex)
+            catch (ArgumentNullException ex)            
             {
 
                 errorModel = new ErrorModel()
@@ -216,6 +211,17 @@ namespace MessageReceiverApp.Controllers
 
                 };
 
+            }
+            catch (ServiceBusException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
             }
             finally
             {
@@ -237,15 +243,13 @@ namespace MessageReceiverApp.Controllers
             [FromQuery] Dictionary<string, long> queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var deferredReceiver = kServiceBusClient.CreateReceiver(queueNameString,
             new ServiceBusReceiverOptions()
             {
 
                 PrefetchCount = 2,
-                ReceiveMode = ServiceBusReceiveMode.PeekLock
+                ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
 
             });
 
@@ -281,6 +285,17 @@ namespace MessageReceiverApp.Controllers
 
                 };
 
+            }
+            catch (ServiceBusException ex)
+            {
+
+                errorModel = new ErrorModel()
+                {
+
+                    Code = 500,
+                    Message = ex.Message
+
+                };
             }
             finally
             {

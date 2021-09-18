@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Transactions;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.Management.ServiceBus;
 using MessageProducerApp.Models;
 using Newtonsoft.Json;
 
@@ -15,9 +17,10 @@ namespace MessageProducerApp.Controllers
     public class ProducerController : Controller
     {
 
-        private static ServiceBusClient kServiceBusClient;  
+        private ServiceBusClient kServiceBusClient;
+        private ServiceBusManagementClient kServiceBusManagementClient;
 
-        private static List<ServiceBusMessage> PrepareAllMessages(List<MessageModel> messagesList)
+        private static List<ServiceBusMessage> PrepareAllQueueMessages(List<MessageModel> messagesList)
         {
 
             var serviceBusMessagesList = new List<ServiceBusMessage>(messagesList.Count);            
@@ -25,12 +28,13 @@ namespace MessageProducerApp.Controllers
             {
 
                 var messageBodyString = JsonConvert.SerializeObject(messageBody);
+                var serviceBusMessage = new ServiceBusMessage(messageBodyString);
+
                 var partitionKeyString = messageBody.Name;
                 var messageIdString = messageBody.MessageId;
+                serviceBusMessage.PartitionKey = partitionKeyString;
+                // serviceBusMessage.MessageId = messageIdString;
 
-                 var serviceBusMessage = new ServiceBusMessage(messageBodyString);
-                 serviceBusMessage.PartitionKey = partitionKeyString;
-                 // serviceBusMessage.MessageId = messageIdString;   
                  serviceBusMessagesList.Add(serviceBusMessage);
 
             }
@@ -39,7 +43,7 @@ namespace MessageProducerApp.Controllers
 
         }
 
-        private static List<ServiceBusMessage> PrepareAllOCRs(List<OCRModel> ocrList)
+        private static List<ServiceBusMessage> PrepareAllOCRMessages(List<OCRModel> ocrList)
         {
 
             var serviceBusMessagesList = new List<ServiceBusMessage>(ocrList.Count);
@@ -65,15 +69,13 @@ namespace MessageProducerApp.Controllers
 
         }
 
-        private static async Task<ResponseModel> SendQueueMessageAsync
+        private async Task<ResponseModel> SendQueueMessageAsync
             (string queueNameString, HeaderModel headerModel, List<MessageModel> messagesList)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var serviceBusSender = kServiceBusClient.CreateSender(queueNameString);            
-            var serviceBusMessagesList = PrepareAllMessages(messagesList);
+            var serviceBusMessagesList = PrepareAllQueueMessages(messagesList);
             ResponseModel responseModel = null;
 
             try
@@ -108,16 +110,14 @@ namespace MessageProducerApp.Controllers
 
         }
 
-        private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
+        private async Task<List<ResponseModel>> ScheduleQueueMessageAsync
             (string queueNameString, HeaderModel headerModel, List<MessageModel> messagesList,
             Dictionary<string, int> queryStringMap)
         {
 
-            if (kServiceBusClient == null)
-                kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+            kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
             var serviceBusSender = kServiceBusClient.CreateSender(queueNameString);            
-            var serviceBusMessagesList = PrepareAllMessages(messagesList);                
+            var serviceBusMessagesList = PrepareAllQueueMessages(messagesList);                
             int delayMinutes = (int)(queryStringMap["delayBy"])/60;
             long scheduleSequence = 0;            
             var responseModelsList = new List<ResponseModel>();
@@ -169,15 +169,13 @@ namespace MessageProducerApp.Controllers
 
         }
 
-        private static async Task<bool> SendTopicMessageAsync
+        private async Task<bool> SendTopicMessageAsync
            (string topicNameString, HeaderModel headerModel, List<OCRModel> ocrList)
         {
 
-           if (kServiceBusClient == null)
-               kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
-
+           kServiceBusClient = new ServiceBusClient(headerModel.ConnectionString);
            var serviceBusSender = kServiceBusClient.CreateSender(topicNameString);
-           var serviceBusMessagesList = PrepareAllOCRs(ocrList);
+           var serviceBusMessagesList = PrepareAllOCRMessages(ocrList);
            bool couldProcess = false;
 
            try
@@ -210,7 +208,7 @@ namespace MessageProducerApp.Controllers
             return Ok(responseModel);
 
         }
-
+        
         [HttpPost]
         [Route("schedule/queue/{queueNameString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
