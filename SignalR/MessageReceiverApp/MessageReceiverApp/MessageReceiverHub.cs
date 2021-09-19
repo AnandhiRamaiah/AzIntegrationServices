@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-
+using Microsoft.Extensions.Configuration;
 
 
 namespace MessageReceiverApp
@@ -16,7 +16,7 @@ namespace MessageReceiverApp
         public MessageReceiverHub(MessageProcessorController messageProcessorController)
         {
 
-            _messageProcessorController = messageProcessorController;
+            _messageProcessorController = messageProcessorController;            
 
         }
 

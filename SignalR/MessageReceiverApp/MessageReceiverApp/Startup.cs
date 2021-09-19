@@ -12,6 +12,7 @@ namespace MessageReceiverApp
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,9 +24,9 @@ namespace MessageReceiverApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
-            services.AddSignalR();
+            services.AddSignalR();            
             services.AddScoped<MessageReceiverHub>();
-            services.AddSingleton<MessageProcessorController>();
+            services.AddSingleton<MessageProcessorController>();            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +50,7 @@ namespace MessageReceiverApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
-                endpoints.MapHub<MessageReceiverHub>("/servicebus");
+                endpoints.MapHub<MessageReceiverHub>("/servicebus");                
             });
         }
     }

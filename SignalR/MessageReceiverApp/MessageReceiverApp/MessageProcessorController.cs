@@ -5,17 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Configuration;
 
 namespace MessageReceiverApp
 {
     public class MessageProcessorController
     {
 
-        private static string kServiceBusQueueConnectionString = "Endpoint=sb://socialstdns.servicebus.windows.net/;SharedAccessKeyName=tweetqueue-listen-rule;SharedAccessKey=AivzQUOtYddt96rS2T4YbZxnkZ7nC4C6N5ehX+08KWw=;EntityPath=tweetqueue";
-        private static string kServiceBusTopicConnectionString = "Endpoint=sb://socialstdns.servicebus.windows.net/;SharedAccessKeyName=ocrtopic-listen-rule;SharedAccessKey=Zq5Om85iu3gSrH0tPDyazz5feK3PXRIWMaZhIqfido4=;EntityPath=ocrtopic";
         private static string kServiceBusQueueString = "tweetqueue";
         private static string kServiceBusTopicString = "ocrtopic";
         private static string kServiceBusSubscriptionString = "ocrsubscription";
+        private string kServiceBusQueueConnectionString;
+        private string kServiceBusTopicConnectionString;
         private ServiceBusClient _serviceBusClient;
         private ServiceBusClient _serviceBusSessionClient;
         private ServiceBusProcessor _serviceBusProcessor;
@@ -96,8 +97,11 @@ namespace MessageReceiverApp
         public HubCallerContext Context { get; set; }
         public IHubCallerClients Clients { get; set; }
 
-        public MessageProcessorController()
+        public MessageProcessorController(IConfiguration configuration)
         {
+            
+            kServiceBusQueueConnectionString = configuration.GetValue<string>("QueueConnectionString");    
+            kServiceBusTopicConnectionString = configuration.GetValue<string>("TopicConnectionString");    
 
             var serviceBusClientOptions = new ServiceBusClientOptions()
             {

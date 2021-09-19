@@ -21,6 +21,12 @@ namespace MessageReceiverApp
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+                .ConfigureAppConfiguration((hostingContext, configBuilder) =>
+                {
+
+                    configBuilder.AddJsonFile("appsettings.Development.json");
+
+                });                
     }
 }
