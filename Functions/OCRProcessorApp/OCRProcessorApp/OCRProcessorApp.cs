@@ -8,7 +8,9 @@ namespace OCRProcessorApp
     public static class OCRProcessorApp
     {
         [FunctionName("OCRProcessorApp")]
-        public static void Run([ServiceBusTrigger("ocrtopic", "ocrsubscription", Connection = "ServiceBusTopicConnection")] string mySbMsg, ILogger log)
+        public static void Run([ServiceBusTrigger("ocrtopic", "ocrsubscription",
+                                Connection = "ServiceBusTopicConnection")]
+                                string mySbMsg, ILogger log)
         {
             log.LogInformation($"C# ServiceBus topic trigger function processed message: {mySbMsg}");
         }
