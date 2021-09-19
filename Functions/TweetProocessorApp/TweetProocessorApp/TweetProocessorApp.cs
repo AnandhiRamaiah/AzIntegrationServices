@@ -16,47 +16,22 @@ namespace TweetProocessorApp
     {
 
         [FunctionName("TweetProocessorApp")]
-        public static async Task Run([ServiceBusTrigger("tweetqueue",
-                                        Connection = "ServiceBusQueueConnection")]
-                                        Message message,
-                                        MessageReceiver messageReceiver,
-                                        Int32 deliveryCount,
-                                        string messageId,
-                                        ILogger log)
+        [return: ServiceBus("tweetqueue", Connection = "SecondaryQueueConnection")]
+        public static Message Run([ServiceBusTrigger("tweetqueue",
+                                        Connection = "PrimaryQueueConnection")]
+                                        Message message, ILogger log)
         {    
-          
-            log.LogInformation($"messageId:{messageId}");
-            log.LogInformation($"deliveryCount:{deliveryCount}");
-
+                                 
             var messageItem = JsonConvert.DeserializeObject<MessageModel>
-                              (Encoding.UTF7.GetString(message.Body));
+            (Encoding.UTF8.GetString (message.Body));
 
-            await messageReceiver.DeadLetterAsync(message.SystemProperties.LockToken);
-            //await messageReceiver.CompleteAsync(message.SystemProperties.LockToken);            
+            var newmsg = message.Clone();
 
             log.LogInformation($"Name:{messageItem.Name}");
-            log.LogInformation($"Tweet:{messageItem.Tweet}");            
+            log.LogInformation($"Tweet:{messageItem.Tweet}");
 
-        }
+            return newmsg;
 
-        //[FunctionName("TweetProocessorApp")]
-        //public static async Task Run([ServiceBusTrigger("tweetqueue",
-        //                        Connection = "ServiceBusQueueConnection")]
-        //                        Message message,        
-        //                        Int32 deliveryCount,
-        //                        string messageId,
-        //                        ILogger log)
-        //{
-
-        //    log.LogInformation($"messageId:{messageId}");
-        //    log.LogInformation($"deliveryCount:{deliveryCount}");
-
-        //    var messageItem = JsonConvert.DeserializeObject<MessageModel>
-        //                      (Encoding.UTF7.GetString(message.Body));                    
-
-        //    log.LogInformation($"Name:{messageItem.Name}");
-        //    log.LogInformation($"Tweet:{messageItem.Tweet}");
-
-        //}
+        }        
     }
 }
