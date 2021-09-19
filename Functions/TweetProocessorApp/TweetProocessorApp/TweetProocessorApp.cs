@@ -21,16 +21,15 @@ namespace TweetProocessorApp
                                         Connection = "PrimaryQueueConnection")]
                                         Message message, ILogger log)
         {    
-                                 
-            var messageItem = JsonConvert.DeserializeObject<MessageModel>
-            (Encoding.UTF8.GetString (message.Body));
 
-            var newmsg = message.Clone();
+            var forwardMessage = message.Clone();
+            var messageItem = JsonConvert.DeserializeObject<MessageModel>
+            (Encoding.UTF8.GetString (forwardMessage.Body));
 
             log.LogInformation($"Name:{messageItem.Name}");
             log.LogInformation($"Tweet:{messageItem.Tweet}");
 
-            return newmsg;
+            return forwardMessage;
 
         }        
     }
