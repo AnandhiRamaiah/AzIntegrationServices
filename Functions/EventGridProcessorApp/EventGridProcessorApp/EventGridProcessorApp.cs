@@ -1,6 +1,4 @@
-﻿// Default URL for triggering event grid function in the local environment.
-// http://localhost:7071/runtime/webhooks/EventGrid?functionName={functionname}
-using System;
+﻿using System;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.EventGrid.Models;
@@ -12,7 +10,8 @@ namespace EventGridProcessorApp
     public static class EventGridProcessorApp
     {
         [FunctionName("EventGridProcessorApp")]
-        public static void Run([EventGridTrigger] EventGridEvent eventGridEvent, ILogger log)
+        public static void Run([EventGridTrigger] EventGridEvent eventGridEvent,
+                                ILogger log)
         {
             log.LogInformation(eventGridEvent.Data.ToString());
         }
