@@ -7,17 +7,19 @@ using Microsoft.AspNetCore.SignalR;
 using Azure.Storage.Blobs;
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Processor;
+using Microsoft.Extensions.Configuration;
 
 namespace EventHubReceiverApp
 {
     public class EventProcessorController
     {
-
-        private static string kStorageConnectionString = "DefaultEndpointsProtocol=https;AccountName=armwkshstg;AccountKey=KMNK9qum/0mduaXx5Gvknr6J4RoXgRiFJCEBe053EC3nN8sJpD0ZV1oF4HkmwPeP/Ok3YaFyW4ktlHZrZNi+Og==;EndpointSuffix=core.windows.net";
+        
         private static string kBlobContainerNameString = "azure-webjobs-eventhub";
-        private static string kEventHubConnectionString = "Endpoint=sb://armwkshpehns.servicebus.windows.net/;SharedAccessKeyName=armocreh-sendandlisten-rule;SharedAccessKey=hpSN+2Wq//HDkB0MLBkTunwo1xvmFe+f+kckFLW7zyk=;EntityPath=armocreh";
+        
         private static string kConsumerGroupNameString = "armocreh-consumer-group-1";    
 
+        private string kStorageConnectionString;
+        private string kEventHubConnectionString;
         private BlobContainerClient _blobContainerClient;
         private EventProcessorClient _eventProcessorClient;
         
@@ -55,8 +57,11 @@ namespace EventHubReceiverApp
         public IHubCallerClients Clients {get; set;}
 
 
-        public EventProcessorController()
+        public EventProcessorController(IConfiguration configuration)
         {                  
+
+            kStorageConnectionString = configuration.GetValue<string>("StorageConnectionString");    
+            kEventHubConnectionString = configuration.GetValue<string>("EventHubConnectionString");    
 
             _blobContainerClient = new BlobContainerClient(kStorageConnectionString,
                                                            kBlobContainerNameString);
