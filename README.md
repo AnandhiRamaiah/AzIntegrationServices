@@ -2,11 +2,17 @@
 
 ![messaging-suite](./Assets/messaging-suite.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 ## Messages
 
 ![about-service-bus-queue](./Assets/about-service-bus-queue.png)
 
+​					***<u>Reference: Microsoft Docs</u>***
+
 ![about-service-bus-topic](./Assets/about-service-bus-topic.png)
+
+​				***<u>Reference: Microsoft Docs</u>***
 
 - **Raw Data** *Produced* by a service to be *Consumed* or *Stored* elsewhere
 
@@ -25,6 +31,8 @@
 ## Facts/Events
 
 ![event_hubs_architecture](./Assets/event_hubs_architecture.png)
+
+​								***<u>Reference: Microsoft Docs</u>***
 
 - **Lightweight** notification of a *Condition* or a *State* change
 
@@ -61,8 +69,10 @@
 
   ![what-is-serverless](./Assets/what-is-serverless.png)
 
-  
+  ***<u>Reference: Microsoft Docs</u>***
 
+  
+  
   - Full **Abstraction** of *Servers*
   - Instant, **Event-Driven Scalability**
   - **Pay-per-use**
@@ -73,8 +83,10 @@
 
   ![faas](./Assets/faas.png)
 
+  ***<u>Reference: Microsoft Docs</u>***
   
-
+  
+  
   - **Integrated programming model** 
     - Built-in **Triggers** and **Bindings** to define when a *Function* is invoked and to what *Data* it connects
   - **Enhanced development experience**
@@ -86,9 +98,11 @@
   
 
   #### Logic App
-
+  
   ![logica-app](./Assets/logica-app.png)
-
+  
+  ***<u>Reference: Microsoft Docs</u>***
+  
   - **Low Code** Approach
   - **Automate** workflows
   - **Orchestrate** business processes
@@ -96,12 +110,14 @@
     - *Connect* and *Integrate* Data from the cloud to on-premises
     - **B2B** and Enterprise *Messaging* in the cloud
     - Powerful web-based **Workflow Designer**
-
   
-
+  
+  
   #### Containers
 
 ![containers](./Assets/containers.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 - **Deploy** your applications *quickly* and *predictably*
 
@@ -117,11 +133,15 @@
 
 ![app-service](./Assets/app-service.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 
 
 #### API Management
 
 ![apim](./Assets/apim.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 - Cloud hosted, turnkey solution 
 - Works with any host, API, and scale
@@ -134,7 +154,11 @@
 
 ## Messaging Services - Deep Dive
 
+
+
 ![messaging](./Assets/messaging.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 
 
@@ -154,6 +178,8 @@
 
 ![about-service-bus-queue](./Assets/about-service-bus-queue.png)
 
+​					***<u>Reference: Microsoft Docs</u>***
+
 - Offer *First In, First Out* (FIFO) message delivery to one or more competing consumers
 
 - Receivers typically receive and process messages in the order in which they were added to the queue, and only one message consumer receives and processes each message
@@ -168,6 +194,8 @@
 
   ![brokered-messaging](./Assets/brokered-messaging.png)
 
+  ​					***<u>Reference: Microsoft Docs</u>***
+
   - **Maximize Availability** - delays arising in services won't have an immediate and direct impact on the application
   - **Producer** can continue to post messages to the queue even when the service isn't available or isn't currently processing messages
   - **Consumer** can process at its own pace, without being overloaded
@@ -177,6 +205,8 @@
 
   ![competing-consumers](./Assets/competing-consumers.png)
 
+  ​					***<u>Reference: Microsoft Docs</u>***
+  
   - Multiple receivers compete for messages on the same queue 
   - Provides Automatic **Load Balancing** of work to receivers volunteering for jobs
   - Improves **Reliability**
@@ -187,12 +217,14 @@
   - Improve **Resiliency**
     - Consumer service instance reads and processes the message as part of a transactional operation
     - If the consumer service instance fails, this pattern can ensure that the message will be returned to the queue to be picked up and handled by another instance of the consumer service
-
+  
   
 
 ### Topics and subscriptions
 
 ![about-service-bus-topic](./Assets/about-service-bus-topic.png)
+
+​					***<u>Reference: Microsoft Docs</u>***
 
 - Provide a one-to-many form of communication, in a *publish/subscribe* pattern
 
@@ -203,6 +235,8 @@
 - #### Fan-Out
 
   ![fan-out](./Assets/fan-out.png)
+
+  ***<u>Reference: Microsoft Docs</u>***
 
   - ##### Message Distribution
 
@@ -218,6 +252,8 @@
 
   ![filtering](./Assets/filtering.png)
 
+  ​			***<u>Reference: Microsoft Docs</u>***
+  
   - Distribute messages across topic subscriptions in a predictable fashion, but not necessarily exclusive
   - Up to 2000 rules per subscription
   - **SQL Filters** - SQL-like conditional expressions
@@ -269,6 +305,8 @@
 
 ![sb-sessions](./Assets/sb-sessions.png)
 
+​					***<u>Reference: Microsoft Docs</u>***
+
 - Sessions allow pinning sets of related sets of related messages to a receiver even when using competing consumers
 - Session state may be used to store intermediate state for a session
 - A session receiver is created by a client accepting a session
@@ -281,6 +319,8 @@
 - Abandoning a message causes the same message to be served again with the next receive operation
 
 ![sessions-2](./Assets/sessions-2.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 
 
@@ -336,7 +376,11 @@
 
 ![sb-fwd-1](./Assets/sb-fwd-1.gif)
 
+​										***<u>Reference: Microsoft Docs</u>***
+
 ![sb-fwd-1](./Assets/sb-fwd-2.gif)
+
+​													***<u>Reference: Microsoft Docs</u>***
 
 - If the destination entity accumulates too many messages and exceeds the quota, or the destination entity is disabled, the source entity adds the messages to its [dead-letter queue](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues) until there is space in the destination *(or the entity is re-enabled*)
 - Messages continue to live in the dead-letter queue, so you must explicitly receive and process them from the dead-letter queue
@@ -350,9 +394,13 @@
 
 ![sb-dr-1](./Assets/sb-dr-1.png)
 
+​					***<u>Reference: Microsoft Docs</u>***
+
 
 
 ![sb-dr-1](./Assets/sb-dr-2.png)
+
+​									***<u>Reference: Microsoft Docs</u>***
 
 - Supports scenarios in which a Service Bus entity or deployment within a data center becomes unavailable
 - To maintain application availability during an outage, Service Bus users can use two separate namespaces, preferably in separate data centers, to host their messaging entities
@@ -676,6 +724,8 @@ private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
 
 ![functional-model](./Assets/event-grid.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 - *Publishers* emit Events, but have no expectation about which events are handled
 - *Subscribers* decide which Events they want to handle
 - Deeply integrated with Azure services and can be integrated with third-party services
@@ -745,11 +795,13 @@ private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
 
 ![event-grid-handler](./Assets/event-grid-handler.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 
 
 ![event-grid-generic](./Assets/event-grid-generic.png)
 
-
+​						***<u>Reference: Microsoft Docs</u>***
 
 ### Batching
 
@@ -1009,12 +1061,16 @@ private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
     - allow ingress of events directly from your virtual network to your topics and domains securely over a [private link](https://docs.microsoft.com/en-us/azure/private-link/private-link-overview) without going through the public internet
 
     ![evt-gr-pvt-ep](./Assets/evt-gr-pvt-ep.png)
+    
+    ​															***<u>Reference: Microsoft Docs</u>***
 
 
 
 ## Event Hub
 
 ![event-hub-generic](./Assets/event-hub-generic.png)
+
+​	***<u>Reference: Microsoft Docs</u>***
 
 - Facilitates the capture, retention, and replay of telemetry and event stream data 
 - Data can come from many concurrent sources
@@ -1031,6 +1087,8 @@ private static async Task<List<ResponseModel>> ScheduleQueueMessageAsync
 ### **Namespace**
 
 ![namespace-eh](./Assets/namespace-eh.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 
 
@@ -1057,6 +1115,8 @@ Sends data to an Event Hub - **Producer**
     
 
   ![partition_keys-eh](./Assets/partition_keys-eh.png)
+
+  ​									***<u>Reference: Microsoft Docs</u>***
 
 - **Publisher Policy**
 
@@ -1160,6 +1220,8 @@ Sends data to an Event Hub - **Producer**
 
 ![capture-eh](./Assets/capture-eh.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 ### Security
 
 - **Authorizarion**
@@ -1217,12 +1279,14 @@ Sends data to an Event Hub - **Producer**
 
   ![multiple-partitions-1](./Assets/multiple-partitions-1.png)
 
+  ​									***<u>Reference: Microsoft Docs</u>***
+
   
 
   ![multiple-partitions-2](./Assets/multiple-partitions-2.png)
 
+  ​									***<u>Reference: Microsoft Docs</u>***
   
-
   - **Advantages of using partitions**
     - Capacity of a single process limited
     - Partitions adds more processes
@@ -1270,6 +1334,8 @@ Sends data to an Event Hub - **Producer**
 
 ![dr-eh-2](./Assets/dr-eh-2.png)
 
+​					***<u>Reference: Microsoft Docs</u>***
+
 - Fault tolerance across **different** datacenter regions.
 - 2 separate premium namespaces are provisioned and paired.
 - Metadata is always in sync.
@@ -1277,35 +1343,49 @@ Sends data to an Event Hub - **Producer**
 
 ![event-hub-flow](./Assets/event-hub-flow.png)
 
-
+***<u>Reference: Microsoft Docs</u>***
 
 ## Use Cases
 
 ![event-domain-eh](./Assets/use-case-1.png)
 
-
+***<u>Reference: Microsoft Docs</u>***
 
 
 
 ![event-domain-eh](./Assets/use-case-2.png)
 
+​										***<u>Reference: Microsoft Docs</u>***
+
 
 
 ![event-domain-eh](./Assets/use-case-3.png)
 
+​		***<u>Reference: Microsoft Docs</u>***
+
 ![event-domain-eh](./Assets/use-case-4.png)
+
+​					***<u>Reference: Microsoft Docs</u>***
 
 ![event-domain-eh](./Assets/use-case-5.png)
 
+​						***<u>Reference: Microsoft Docs</u>***
+
 ![ZipImagesFunction](./Assets/ZipImagesFunction.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 ![ValidateOCR](./Assets/ValidateOCR.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 
 
 ## Azure Batch
 
 ![batch-1](./Assets/batch-1.png)
+
+​						***<u>Reference: Microsoft Docs</u>***
 
 **Configure Machine pool**
 
@@ -1375,7 +1455,11 @@ batchClient.JobOperations.AddTask(JobId, tasks);
 
 ![batch-1](./Assets/batch-2.png)
 
+***<u>Reference: Microsoft Docs</u>***
+
 ![batch-1](./Assets/batch-3.png)
+
+***<u>Reference: Microsoft Docs</u>***
 
 
 
